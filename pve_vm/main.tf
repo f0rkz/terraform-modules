@@ -3,6 +3,7 @@ locals {
   tags            = var.tags
   vm_id           = var.vm_id
   image           = var.image
+  storage_pool    = var.storage_pool
   disk_size       = var.disk_size
   disks           = var.disks
   cpu_cores       = var.cpu_cores
@@ -61,7 +62,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = local.storage_pool
     file_id      = local.image
     interface    = "virtio0"
     size         = local.disk_size
@@ -70,7 +71,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   dynamic "disk" {
     for_each = local.disks
     content {
-      datastore_id = try(disk.value["datastore_id"], "local-zfs")
+      datastore_id = try(disk.value["datastore_id"], local.storage_pool)
       interface    = disk.value["interface"]
       size         = disk.value["size"]
       file_format  = "raw"
@@ -78,7 +79,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   initialization {
-    datastore_id = "local-zfs"
+    datastore_id = local.storage_pool
     dynamic "ip_config" {
       for_each = local.network_devices
       content {
