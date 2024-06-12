@@ -97,7 +97,7 @@ resource "proxmox_virtual_environment_vm" "this" {
       password = "ansible"
       username = "ansible"
     }
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    # user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
   }
 
   dynamic "network_device" {
