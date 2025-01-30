@@ -69,3 +69,9 @@ variable "firewall_rules" {
   default     = []
   description = "List of inbound firewall rules"
 }
+
+variable "storage_pool" {
+  type = string
+  default = "local-zfs"
+  description = "Storage pool to use"
+}

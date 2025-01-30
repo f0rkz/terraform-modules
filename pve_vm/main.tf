@@ -3,6 +3,7 @@ locals {
   tags            = var.tags
   vm_id           = var.vm_id
   image           = var.image
+  storage_pool    = var.storage_pool
   disk_size       = var.disk_size
   disks           = var.disks
   cpu_cores       = var.cpu_cores
@@ -61,7 +62,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = local.storage_pool
     file_id      = local.image
     interface    = "virtio0"
     size         = local.disk_size
@@ -70,7 +71,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   dynamic "disk" {
     for_each = local.disks
     content {
-      datastore_id = try(disk.value["datastore_id"], "local-zfs")
+      datastore_id = try(disk.value["datastore_id"], local.storage_pool)
       interface    = disk.value["interface"]
       size         = disk.value["size"]
       file_format  = "raw"
@@ -78,7 +79,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   initialization {
-    datastore_id = "local-zfs"
+    datastore_id = local.storage_pool
     dynamic "ip_config" {
       for_each = local.network_devices
       content {
@@ -88,7 +89,15 @@ resource "proxmox_virtual_environment_vm" "this" {
         }
       }
     }
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    user_account {
+      keys     = [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAJppmx2EB+eTGeCfBJswDn6BnsQym4LpWCKL8qc7jkkfSSk1Ce0LPzckn4m7n4U1ZXGFmCgsOWK+3Ha9wjojf7sZqAKCMXFhgLVNmUQMOQue554P5Otz/roMoxlsh8XT0/dVBLCw51L2f0xzPrmNkwxe+WSZDBHp/4V3AF8YwNfBlqPcd6VzMGzdFBBZRP2ZVs8VR6+eKcTwcf5pW+nz4mmwYAScTiX6TAzMlLtsgk6yelRFnc/Qv6S97PSH2nq8zwUCqrgT9LVVb8raXtOkNUu0MrhUxIgZ7MkQOle8zjJvLJjB9L5kSJr8D2tROU6nz6fe5XzIv0zg4/13p6JUJ",
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOJ8zP//B/WnOeVERvcSWDLTkOx1O/Q/D1srotew4Y58hDS+ePGBv9jDHL0c1ArM7Eu7qBlylVIGxoHrMGWAO95L7BJhi8ubSXV1/aajlx7DkCr3ZHlntWe2x10uWUcnGjbdnV9OmC7ppuit7o9MPuIcYCX1YkUF59qmQydjsYKzfNtiUdbahyUzBDqUXlNPwy9ngqfPNL6PwMRd0wry1IOpFj2xA729vHx+Ewi3P4YBQJdbP3Wy/0W0uytwLuuVdehTVxwulPFRIsUWUbutOD7RKALeoi2xkHwJ3Tm0TVMjI+lHCbGhBbVLTDOw8zZxnFKL1ttF3OHfKBhTEroG3w+TrFMh0l7wV6t2FXFqoNSQFMwZlvmOKa8s4078TakevQkOegs6cgG0RmCWGdTtk+GfdQf8Hr9RqDzaqFoEifjd9u1c3WK0r69s5mAcxF3AApdG14WemZllOoBhTFG07nunV3653SPPt/397cvLX+Kp+HL9ohzb0Y9JwDi76aaA8="
+      ]
+      password = "ansible"
+      username = "ansible"
+    }
+    # user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
   }
 
   dynamic "network_device" {
