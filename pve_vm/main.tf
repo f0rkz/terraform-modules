@@ -116,7 +116,7 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   lifecycle {
     ignore_changes = [
-      id, disk.file_id
+      id, disk
     ]
   }
 }
