@@ -103,7 +103,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   dynamic "network_device" {
     for_each = local.network_devices
     content {
-      bridge = network_device.value["bridge"]
+      bridge = network_device.key
       firewall = network_device.value["firewall"]
     }
   }
