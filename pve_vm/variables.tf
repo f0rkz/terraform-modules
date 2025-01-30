@@ -60,7 +60,7 @@ variable "memory" {
 }
 
 variable "network_devices" {
-  type        = list(map(any))
+  type        = map(any)
   description = "Network device bridges and their ip address and gateway"
 }
 
